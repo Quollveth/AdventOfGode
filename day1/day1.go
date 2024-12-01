@@ -18,51 +18,51 @@ func absdiff(x, y int) int {
 func Run() {
 	input := util.ReadFileWords("day1/input")
 
-	var ll, rl []int
+	var listA, listB []int
 
 	for i, e := range input {
 		v, _ := strconv.Atoi(e)
 		if i%2 == 0 {
-			ll = append(ll, v)
+			listA = append(listA, v)
 			continue
 		}
-		rl = append(rl, v)
+		listB = append(listB, v)
 	}
 
-	sll := make([]int, len(ll))
-	srl := make([]int, len(rl))
+	listA_sorted := make([]int, len(listA))
+	listB_sorted := make([]int, len(listB))
 
-	copy(sll, ll)
-	copy(srl, rl)
+	copy(listA_sorted, listA)
+	copy(listB_sorted, listB)
 
-	sort.Slice(sll, func(i, j int) bool {
-		return sll[i] < sll[j]
+	sort.Slice(listA_sorted, func(i, j int) bool {
+		return listA_sorted[i] < listA_sorted[j]
 	})
 
-	sort.Slice(srl, func(i, j int) bool {
-		return srl[i] < srl[j]
+	sort.Slice(listB_sorted, func(i, j int) bool {
+		return listB_sorted[i] < listB_sorted[j]
 	})
 
-	s := 0
-	for i := range sll {
-		s += absdiff(sll[i], srl[i])
+	sum := 0
+	for i := range listA_sorted {
+		sum += absdiff(listA_sorted[i], listB_sorted[i])
 	}
 
-	fmt.Println("Part 1 solution:", s)
+	fmt.Println("Part 1 solution:", sum)
 
 	//////// PART 2
 
 	n := 0
-	sc := 0
-	for _, i := range ll {
+	similarity := 0
+	for _, i := range listA {
 		n = 0
-		for _, j := range rl {
+		for _, j := range listB {
 			if i == j {
 				n++
 			}
 		}
-		sc += i * n
+		similarity += i * n
 	}
 
-	fmt.Println("Part 2 solution:", sc)
+	fmt.Println("Part 2 solution:", similarity)
 }
