@@ -29,18 +29,40 @@ func Run() {
 		rl = append(rl, v)
 	}
 
-	sort.Slice(ll, func(i, j int) bool {
-		return ll[i] < ll[j]
+	sll := make([]int, len(ll))
+	srl := make([]int, len(rl))
+
+	copy(sll, ll)
+	copy(srl, rl)
+
+	sort.Slice(sll, func(i, j int) bool {
+		return sll[i] < sll[j]
 	})
 
-	sort.Slice(rl, func(i, j int) bool {
-		return rl[i] < rl[j]
+	sort.Slice(srl, func(i, j int) bool {
+		return srl[i] < srl[j]
 	})
 
-	var s int = 0
-	for i := range ll {
-		s += absdiff(ll[i], rl[i])
+	s := 0
+	for i := range sll {
+		s += absdiff(sll[i], srl[i])
 	}
 
-	fmt.Println(s)
+	fmt.Println("Part 1 solution:", s)
+
+	//////// PART 2
+
+	n := 0
+	sc := 0
+	for _, i := range ll {
+		n = 0
+		for _, j := range rl {
+			if i == j {
+				n++
+			}
+		}
+		sc += i * n
+	}
+
+	fmt.Println("Part 2 solution:", sc)
 }
