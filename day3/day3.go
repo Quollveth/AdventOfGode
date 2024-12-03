@@ -2,6 +2,7 @@ package day3
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/quollveth/AdventOfGode/util"
 )
@@ -36,26 +37,21 @@ func isNum(c rune) bool {
 	return c >= '0' && c <= '9'
 }
 
-func reverseInt(n int) int {
-	new := 0
-	for n > 0 {
-		r := n % 10
-		new += 10
-		new += r
-		n /= 10
+func reverseString(s string) string {
+	runes := []rune(s)
+	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+		runes[i], runes[j] = runes[j], runes[i]
 	}
-
-	return new
+	return string(runes)
 }
 
 func performMul(s *stack) int {
 	// assume the stack is already correct
-	fmt.Println("Received stack:", string(*s))
 
 	num1 := -1
 	num2 := -1
 
-	n := 0
+	n := ""
 	for range len(*s) {
 		cur := s.pop()
 		if cur == ')' { // ignore
@@ -63,26 +59,24 @@ func performMul(s *stack) int {
 		}
 		// comma marks the end of num2
 		if cur == ',' {
-			num2 = reverseInt(n)
-			n = 0
+			num2, _ = strconv.Atoi(reverseString(n))
+			n = ""
 			continue
 		}
 		// open parenthesis marks the end of num1
 		if cur == '(' {
-			num1 = reverseInt(n)
+			num1, _ = strconv.Atoi(reverseString(n))
 			break
 		}
 
-		n *= 10
-		n += int(cur - '0')
+		n += string(cur)
 	}
 
-	fmt.Printf("Multiplying %v and %v\n\n", num1, num2)
 	return num1 * num2
 }
 
 func Run() {
-	input := util.ReadFileFull("day3/testin")
+	input := util.ReadFileFull("day3/input")
 
 	sum := 0
 	stack := stack{}
@@ -130,8 +124,9 @@ func Run() {
 					stack.push(rune(c))
 					continue
 				}
-				stack.clear() // clear on invalid token
+				stack.clear()
 			}
+			stack.clear() // clear on invalid token
 		}
 	}
 
