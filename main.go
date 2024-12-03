@@ -18,6 +18,7 @@ func main() {
 		day2.Run(true)
 		day2.Run(false)
 	case "3":
-		day3.Run()
+		day3.Run(true)
+		day3.Run(false)
 	}
 }

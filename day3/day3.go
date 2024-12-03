@@ -80,7 +80,7 @@ const (
 	dontReady int = 2
 )
 
-func Run() {
+func Run(part1 bool) {
 	input := util.ReadFileFull("day3/input")
 
 	sum := 0
@@ -178,13 +178,13 @@ func Run() {
 			}
 			stack.clear()
 		case ')':
-			if ready == doReady {
+			if ready == doReady && !part1 {
 				enabled = true
 				ready = 0
 				stack.clear()
 				continue
 			}
-			if ready == dontReady {
+			if ready == dontReady && !part1 {
 				enabled = false
 				ready = 0
 				stack.clear()
