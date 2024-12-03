@@ -55,7 +55,7 @@ func checkReport(report []int) bool {
 	return true
 }
 
-func Run() {
+func Run(part1 bool) {
 	input := util.ReadFileLines("day2/input")
 
 	nSafe := 0
@@ -71,6 +71,10 @@ func Run() {
 
 		if valid {
 			nSafe++
+			continue
+		}
+
+		if part1 {
 			continue
 		}
 
