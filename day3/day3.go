@@ -75,51 +75,140 @@ func performMul(s *stack) int {
 	return num1 * num2
 }
 
+const (
+	doReady   int = 1
+	dontReady int = 2
+)
+
 func Run() {
 	input := util.ReadFileFull("day3/input")
 
 	sum := 0
 	stack := stack{}
+	enabled := true
+	ready := 0
 	for _, c := range input {
+		top := stack.peek()
+
 		switch rune(c) {
+		case 'd':
+			stack.clear()
+			stack.push('d')
+		case 'o':
+			if top == 'd' {
+				stack.push('o')
+				continue
+			}
+			stack.clear()
+		case 'n':
+			if top == 'o' {
+				stack.push('n')
+				continue
+			}
+			stack.clear()
+		case '\'':
+			if top == 'n' {
+				stack.push('\'')
+				continue
+			}
+			stack.clear()
+		case 't':
+			if top == '\'' {
+				stack.push('t')
+				continue
+			}
+			stack.clear()
 		case 'm':
+			if !enabled {
+				stack.clear()
+				continue
+			}
+
 			stack.clear()
 			stack.push('m')
 		case 'u':
-			if stack.peek() == 'm' {
+			if !enabled {
+				stack.clear()
+				continue
+			}
+			if top == 'm' {
 				stack.push('u')
 				break
 			}
 			stack.clear() // empty stack on invalid token
 		case 'l':
-			if stack.peek() == 'u' {
+			if !enabled {
+				stack.clear()
+				continue
+			}
+			if top == 'u' {
 				stack.push('l')
 				break
 			}
 			stack.clear()
 		case ',':
-			if isNum(stack.peek()) {
+			if !enabled {
+				stack.clear()
+				continue
+			}
+			if isNum(top) {
 				stack.push(',')
 				break
 			}
 			stack.clear()
 		case '(':
-			if stack.peek() == 'l' {
+			if top == 'o' {
+				ready = doReady
+				stack.push('(')
+				continue
+			}
+			if top == 't' {
+				ready = dontReady
+				stack.push(')')
+				continue
+			}
+
+			if !enabled {
+				stack.clear()
+				continue
+			}
+			if top == 'l' {
 				stack.push('(')
 				break
 			}
 			stack.clear()
 		case ')':
-			if isNum(stack.peek()) {
+			if ready == doReady {
+				enabled = true
+				ready = 0
+				stack.clear()
+				continue
+			}
+			if ready == dontReady {
+				enabled = false
+				ready = 0
+				stack.clear()
+				continue
+			}
+
+			if !enabled {
+				stack.clear()
+				continue
+			}
+			if isNum(top) {
 				stack.push(')')
 				// we reached the end of a mul() operation, calculate
 				sum += performMul(&stack) // this function will clear the stack
 			}
 			stack.clear()
 		default:
+			if !enabled {
+				stack.clear()
+				continue
+			}
 			if isNum(rune(c)) {
 				// a number has to follow another number, a comma, or an open parenthesis
-				val := stack.peek()
+				val := top
 				if val == '(' || val == ',' || isNum(val) {
 					stack.push(rune(c))
 					continue
