@@ -6,26 +6,6 @@ import (
 	"github.com/quollveth/AdventOfGode/util"
 )
 
-/*
-	the input is rectangular (all lines are the same lenght)
-	both xmas and samx are valid
-	a vertical xmas is composed by the letters all having the same offset from start of line
-	a diagonal is the same logic but the offset can only vary by one for each subsequent letter
-
-	**X**
-	**M**
-	**A**
-	**S**
-
-	each letter is 2 characters away from line start
-	this value can vary by 1 or -1 from the previous offset to form a diagonal
-
-	X***
-	*M**
-	**A*
-	***S
-*/
-
 func countOccurrences(arr []string, val string) int {
 	count := 0
 	for _, e := range arr {
@@ -36,93 +16,61 @@ func countOccurrences(arr []string, val string) int {
 	return count
 }
 
-func Run() {
-	input := util.ReadFileLines("day4/testin")
-	// ^[]string
+func transposeMatrix(orig [][]rune) [][]rune {
+	rows, cols := len(orig), len(orig[0])
+	matrix := make([][]rune, cols)
 
-	count := 0
-	inputVer := len(input)
-	inputHor := len(input[0])
-
-	var attempts []string
-	for i, line := range input {
-		for j, char := range line {
-			attempts = []string{}
-
-			c := rune(char)
-
-			if c == 'X' {
-				////// horizontal
-				// left to right
-				if j <= inputHor-4 {
-					attempts = append(attempts, line[j:j+4])
-				}
-				// right to left
-				if j >= 4 {
-					attempts = append(attempts, line[j-3:j+1])
-				}
-
-				////// vertical
-				// top to bottom
-				if i <= inputVer-4 {
-					curr := ""
-					for k := range 4 {
-						curr += string(input[i+k][j])
-					}
-					attempts = append(attempts, curr)
-				}
-				// bottom to top
-				if i >= 4 {
-					curr := ""
-					for k := range 4 {
-						curr += string(input[i-k][j])
-					}
-					attempts = append(attempts, curr)
-				}
-
-				////// diagonal
-				//// top to bottom
-				// left to right
-				if i <= inputVer-4 && j <= inputHor-4 {
-					curr := ""
-					for k := range 4 {
-						curr += string(input[i+k][j+k])
-					}
-					attempts = append(attempts, curr)
-				}
-				// right to left
-				if i <= inputVer-4 && j >= 4 {
-					curr := ""
-					for k := range 4 {
-						curr += string(input[i+k][j-k])
-					}
-					attempts = append(attempts, curr)
-				}
-
-				//// bottom to top
-				// left to right
-				if i >= 4 && j <= inputHor-4 {
-					curr := ""
-					for k := range 4 {
-						curr += string(input[i-k][j+k])
-					}
-					attempts = append(attempts, curr)
-				}
-				// right to left
-				if i >= 4 && j >= 4 {
-					curr := ""
-					for k := range 4 {
-						curr += string(input[i-k][j-k])
-					}
-					attempts = append(attempts, curr)
-				}
-
-				////// Check attempts
-				count += countOccurrences(attempts, "XMAS")
-				count += countOccurrences(attempts, "SAMX")
-			}
+	for i := 0; i < cols; i++ {
+		matrix[i] = make([]rune, rows)
+		for j := 0; j < rows; j++ {
+			matrix[i][j] = orig[j][i]
 		}
 	}
 
-	fmt.Println(count)
+	return matrix
+}
+
+func reverseArray(s []rune) []rune {
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
+	return s
+}
+
+// https://stackoverflow.com/a/8664879
+func rotateMatrix(orig [][]rune) [][]rune {
+	rot := transposeMatrix(orig)
+
+	for i := range rot {
+		rot[i] = reverseArray(rot[i])
+	}
+
+	return rot
+}
+
+func printMatrix(input [][]rune) {
+	for _, line := range input {
+		for _, char := range line {
+			fmt.Printf(string(char))
+		}
+		fmt.Printf("\n")
+	}
+}
+
+func Run() {
+	in := util.ReadFileLines("day4/numbers")
+	inputCols := len(in[0])
+	inputRows := len(in)
+
+	input := make([][]rune, inputRows)
+	for i := range inputRows {
+		input[i] = make([]rune, inputCols)
+		for j := range inputCols {
+			input[i][j] = rune(in[i][j])
+		}
+	}
+
+	printMatrix(input)
+	fmt.Println("------------")
+	printMatrix(rotateMatrix(input))
 }
