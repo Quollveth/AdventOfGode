@@ -2,6 +2,7 @@ package day5
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -64,29 +65,39 @@ func contains(s []int, v int) bool {
 func Part1() {
 	rules, updates := readInput()
 	var valid bool
-	sum := 0
+	p1sum := 0
+	p2sum := 0
 	for _, update := range updates {
 		valid = true
 		for j, page := range update {
 			// check all pages in front if they should not be there
 			for _, pageAfter := range update[j:] {
-				if slice, exists := rules[page]; exists {
-					if contains(slice, pageAfter) {
-						valid = false
-						// entire update is invalid and we can stop checking it
-						goto breakBoth
-					}
+				slice := rules[page]
+				if contains(slice, pageAfter) {
+					valid = false
+					// entire update is invalid and we can stop checking it
+					break
 				}
+
 			}
 		}
-	breakBoth:
-		if !valid {
+		if valid {
+			median := int(len(update) / 2)
+			p1sum += update[median]
 			continue
 		}
-		// update is valid
+
+		// sort invalid update and get median
+		sort.Slice(update, func(i, j int) bool {
+			// i is less than j if i is in j's map
+			// so i has to come before j
+			sl := rules[update[j]]
+			return contains(sl, update[i])
+		})
 		median := int(len(update) / 2)
-		sum += update[median]
+		p2sum += update[median]
 	}
 
-	fmt.Println(sum)
+	fmt.Println(p1sum)
+	fmt.Println(p2sum)
 }
