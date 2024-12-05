@@ -2,6 +2,7 @@ package day4
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/quollveth/AdventOfGode/util"
 )
@@ -65,23 +66,31 @@ func inRange(min, max, val int) bool {
 	return val >= min && val < max
 }
 
-func makeWindow(orig *[][]rune, centerRow, centerCol int) [][]rune {
+func makeWindow(orig *[][]rune, centerRow, centerCol, size int) [][]rune {
+	if size%2 == 0 {
+		log.Panic("Window size must be an odd number")
+	}
+
 	lineLen := len((*orig)[0])
 	lines := len((*orig))
 
-	newMatrix := make([][]rune, 7)
-	for i := range 7 {
-		newMatrix[i] = make([]rune, 7)
-		for j := range 7 {
-			// out of bounds indexes are filled with 1 as square matrices are easier and thats not a real rune
+	// Create a new square matrix of the specified size
+	newMatrix := make([][]rune, size)
+	for i := range newMatrix {
+		newMatrix[i] = make([]rune, size)
+		for j := range newMatrix[i] {
+			// Fill out-of-bounds indexes with 1 as placeholder
 			newMatrix[i][j] = 1
 		}
 	}
 
-	for i := 0; i < 7; i++ {
-		for j := 0; j < 7; j++ {
-			origRow := centerRow + i - 3
-			origCol := centerCol + j - 3
+	// Calculate the offset for centering
+	offset := size / 2
+
+	for i := 0; i < size; i++ {
+		for j := 0; j < size; j++ {
+			origRow := centerRow + i - offset
+			origCol := centerCol + j - offset
 
 			if inRange(0, lines, origRow) && inRange(0, lineLen, origCol) {
 				newMatrix[i][j] = (*orig)[origRow][origCol]
@@ -92,8 +101,14 @@ func makeWindow(orig *[][]rune, centerRow, centerCol int) [][]rune {
 	return newMatrix
 }
 
-func Run() {
-	in := util.ReadFileLines("day4/input")
+const (
+	real = "day4/input"
+	test = "day4/testin"
+	tiny = "day4/tinyin"
+)
+
+func getInput(which string) [][]rune {
+	in := util.ReadFileLines(which)
 
 	// turn input into byte matrix to make working with it easier
 	inputCols := len(in[0])
@@ -106,7 +121,11 @@ func Run() {
 			input[i][j] = rune(in[i][j])
 		}
 	}
+	return input
+}
 
+func Part1() {
+	input := getInput(real)
 	/*
 		make a 7x7 window into the input matrix
 		X in the middle and MAS in each direction
@@ -127,7 +146,7 @@ func Run() {
 		for j, char := range line {
 			if char == 'X' {
 
-				window = makeWindow(&input, i, j)
+				window = makeWindow(&input, i, j, 7)
 
 				// check horizontal and diagonal
 				// rotate matrix 90°
@@ -158,4 +177,51 @@ func Run() {
 	}
 
 	fmt.Println(count)
+}
+
+func matchMas(window *[][]rune) bool {
+	// part 1 solution was general enough i earn a little stupid, as a treat
+	// as the window gets rotated this matches all possible positions (theres only 4)
+	var MAS = [][]rune{
+		{'M', '.', 'S'},
+		{'.', 'A', '.'},
+		{'M', '.', 'S'},
+	}
+
+	for i := range 3 {
+		for j := range 3 {
+			if MAS[i][j] == '.' { // wildcard
+				continue
+			}
+			if MAS[i][j] != (*window)[i][j] {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func Part2() {
+	input := getInput(real)
+	fmt.Println()
+
+	var window [][]rune
+	count := 0
+	for i, line := range input {
+		for j, char := range line {
+			if char == 'A' {
+				window = makeWindow(&input, i, j, 3)
+
+				for range 4 {
+					if matchMas(&window) {
+						count++
+						break // stop on match to avoid overcounting
+					}
+					window = rotateMatrix(window)
+				}
+			}
+		}
+	}
+	fmt.Println(count)
+
 }
