@@ -26,6 +26,6 @@ func main() {
 		day4.Part1() // it took 4 days to think of a non stupid way to do this
 		day4.Part2()
 	case "5":
-		day5.Part1()
+		day5.Run()
 	}
 }

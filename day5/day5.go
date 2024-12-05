@@ -62,7 +62,7 @@ func contains(s []int, v int) bool {
 	return false
 }
 
-func Part1() {
+func Run() {
 	rules, updates := readInput()
 	var valid bool
 	p1sum := 0
