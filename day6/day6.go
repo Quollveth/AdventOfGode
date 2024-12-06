@@ -122,13 +122,11 @@ func getHit(arr []point, smaller bool) point {
 
 func Run() {
 	// this reads into a rune matrix
-	obstacles, guard, size := getInput("day6/testin")
+	obstacles, guard, gridSize := getInput("day6/input")
+	visited := make(map[point]bool)
+	visited[guard.position] = true
 
-	sum := 0
 	for { // loop until guard is out of the area
-
-		fmt.Printf("\nGuard is at %v facing %v\n", guard.position, guard.direction)
-
 		var (
 			matchX, // obstacle should have the same X coordinate
 			matchY, // obstacle should have the same Y coordinate
@@ -170,56 +168,66 @@ func Run() {
 			potential = append(potential, ob)
 		}
 
-		// potential hits acquires
+		// potential hits acquired
 		// if theres 0 we're done and can leave the area
 		// if theres 1 thats the hit
 		// if theres more sort the array and get the first or last
-		if len(potential) == 0 {
+		// otherwise we need to sort the array and pick the proper one depending on direction
+
+		var dist int
+		done := false
+
+		// get distance we need to walk
+		switch len(potential) {
+		case 0:
+			done = true
 			// get guard direction and calculate distance to edge of area
 			if matchX && smaller {
 				// up
-				sum += guard.position.y
-				break
+				dist = guard.position.y
 			}
 			if matchX && !smaller {
 				//down
-				sum += size.y - guard.position.y
-				break
+				dist = gridSize.y - guard.position.y
 			}
 			if matchY && smaller {
 				//left
-				sum += guard.position.x
-				break
+				dist = guard.position.x
 			}
-			// if matchY && !smaller {
-			// right
-			sum += size.x - guard.position.x
-			break
-		}
-
-		// if there is only one potential obstacle it is the hit
-		hit = potential[0]
-		// otherwise we need to sort the array and pick the proper one depending on direction
-		if len(potential) > 1 {
+			if matchY && !smaller {
+				// right
+				dist = gridSize.x - guard.position.x
+			}
+		case 1:
+			hit = potential[0]
+		default:
 			hit = getHit(potential, smaller)
 		}
-		// we have the hit location, get distance to it and move guard there
+
 		// -1 since we end right next to the obstacle
-		dist := 0
-		if matchX {
+		if matchX && !done {
 			dist += absdiff(hit.y, guard.position.y) - 1
 		}
-		if matchY {
+		if matchY && !done {
 			dist += absdiff(hit.x, guard.position.x) - 1
 		}
 
-		sum += dist
-		guard.position.x += dist * guard.direction.x
-		guard.position.y += dist * guard.direction.y
+		// walk the guard marking all visited positions
+		for range dist {
+			guard.position.x += guard.direction.x
+			guard.position.y += guard.direction.y
+
+			visited[guard.position] = true
+		}
 
 		// rotate the guard 90° clockwise
 		guard.direction = point{x: -guard.direction.y, y: guard.direction.x}
+
+		// we left the area
+		if done {
+			break
+		}
 	}
 
-	fmt.Println(sum)
+	fmt.Println(len(visited))
 }
