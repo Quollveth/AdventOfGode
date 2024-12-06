@@ -8,6 +8,7 @@ import (
 	"github.com/quollveth/AdventOfGode/day3"
 	"github.com/quollveth/AdventOfGode/day4"
 	"github.com/quollveth/AdventOfGode/day5"
+	"github.com/quollveth/AdventOfGode/day6"
 )
 
 func main() {
@@ -27,5 +28,7 @@ func main() {
 		day4.Part2()
 	case "5":
 		day5.Run()
+	case "6":
+		day6.Run()
 	}
 }
