@@ -2,6 +2,7 @@ package day7
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"sync"
@@ -49,6 +50,21 @@ func Run() {
 	fmt.Println(count)
 }
 
+func isConcat(a, b int) bool {
+	// check is b is a suffix of a
+	// isConcat(1954,54) -> true
+	bDigits := int(math.Log10(float64(b)) + 1)
+	suffix := a % int(math.Pow(10, float64(bDigits)))
+	return suffix == b
+}
+
+func deconcat(a, b int) int {
+	// remove b from a
+	// deconcat(1954,54) -> 19
+	bDigits := int(math.Log10(float64(b)) + 1)
+	return a / int(math.Pow(10, float64(bDigits)))
+}
+
 // Check if this row has valid operands
 func processRow(row string) int64 {
 	// Parse data
@@ -89,5 +105,15 @@ func validateLine(current int, remain []int) bool {
 			return true
 		}
 	}
+
+	// concat is also an easy check
+	if isConcat(current, next) {
+		if validateLine(deconcat(current, next), remain[1:]) {
+			return true
+		}
+	}
+
+	// addition
 	return validateLine(current-next, remain[1:])
+
 }
