@@ -14,44 +14,67 @@ type point struct {
 // first global variable of the year letsgo
 var antinodes map[point]bool = make(map[point]bool)
 
-func Run() {
-	antennaLocations, gridSize := getInput("day8/tinyin")
+func printGrid(antennas map[point]rune, size point, color int) {
+	for i := range size.x {
+		for j := range size.y {
+			tp := "."
+			pl := point{i, j}
 
-	for _, v := range antennaLocations {
-		//fmt.Printf("'%v': %v\n", string(k), v)
+			if _, has := antinodes[pl]; has {
+				tp = "#"
+			}
+			if _, has := antennas[pl]; has {
+				tp = string(antennas[pl])
+			}
+
+			fmt.Printf("\033[%vm%v\033[39m", color, tp)
+		}
+		fmt.Println()
+	}
+	fmt.Println()
+}
+
+func Run() {
+	antennaLocations, antennas, gridSize := getInput("day8/testin")
+	_, _, _ = gridSize.x, gridSize.y, antennas
+
+	for k, v := range antennaLocations {
+		_ = k
 
 		findAntinodes(&v)
 	}
 
-	allAntennas := make(map[point]rune)
-	for c, locs := range antennaLocations {
-		for _, l := range locs {
-			allAntennas[l] = c
+	// remove all antis out of bounds or in an antenna
+	for anti := range antinodes {
+		if !inRange(anti.x, 0, gridSize.x) {
+			delete(antinodes, anti)
+		}
+		if !inRange(anti.y, 0, gridSize.y) {
+			delete(antinodes, anti)
+		}
+		if _, has := antennas[anti]; has {
+			delete(antinodes, anti)
 		}
 	}
 
-	for i := range gridSize.x {
-		for j := range gridSize.y {
-			toPrint := "."
-			if _, has := antinodes[point{i, j}]; has {
-				toPrint = "#"
-			}
-			if _, has := allAntennas[point{i, j}]; has {
-				toPrint = string(allAntennas[point{i, j}])
-			}
-			fmt.Print(toPrint)
-		}
-		fmt.Print("\n")
-	}
+	printGrid(antennas, gridSize, 32)
+
+	fmt.Println(len(antinodes))
+
 }
 
-func getInput(which string) (map[rune][]point, point) {
+func inRange(a, min, max int) bool {
+	return min < a && a < max
+}
+
+func getInput(which string) (map[rune][]point, map[point]rune, point) {
 	in := util.ReadFileLines(which)
 
 	inputCols := len(in[0])
 	inputRows := len(in)
 
 	antenna := make(map[rune][]point)
+	allAntennas := make(map[point]rune)
 
 	// read the location of every antenna into a map
 	for i := range inputRows {
@@ -65,7 +88,9 @@ func getInput(which string) (map[rune][]point, point) {
 			if _, has := antenna[c]; !has {
 				antenna[c] = make([]point, 0)
 			}
-			antenna[c] = append(antenna[c], point{x: i, y: j})
+			p := point{x: i, y: j}
+			antenna[c] = append(antenna[c], p)
+			allAntennas[p] = c
 		}
 	}
 
@@ -74,7 +99,7 @@ func getInput(which string) (map[rune][]point, point) {
 		y: inputRows,
 	}
 
-	return antenna, gridSize
+	return antenna, allAntennas, gridSize
 }
 
 // finds all antinodes are formed by these points
@@ -84,19 +109,43 @@ func findAntinodes(nodes *[]point) {
 		return
 	}
 
-	for _, node := range *nodes {
-		for _, next := range *nodes {
-			// any two points form a line and have two antinodes
-			antis := getAntis(node, next)
-			antinodes[antis[0]] = true
-			antinodes[antis[1]] = true
+	for _, comb := range combinations(*nodes) {
+		antis := getAntis(comb[0], comb[1])
+
+		antinodes[antis[0]] = true
+		antinodes[antis[1]] = true
+	}
+}
+
+// every unique unordered pair
+func combinations(points []point) [][2]point {
+	comb := [][2]point{}
+	plen := len(points)
+
+	for i := range plen - 1 {
+		for j := i + 1; j < plen; j++ {
+			comb = append(comb, [2]point{points[i], points[j]})
 		}
 	}
+
+	return comb
 }
 
 // // hell yeah more linear algebra
 type vec2d struct {
 	x, y float64
+}
+
+func (v vec2d) magnitude() float64 {
+	return math.Sqrt((v.x * v.x) + (v.y * v.y))
+}
+
+func (v vec2d) normalize() vec2d {
+	mag := v.magnitude()
+	return vec2d{
+		x: v.x / mag,
+		y: v.y / mag,
+	}
 }
 
 func (v vec2d) scale(scalar float64) vec2d {
@@ -145,15 +194,16 @@ func pointFromVec(v vec2d) point {
 func getAntis(a, b point) [2]point {
 	var antis [2]point
 
-	direction := vecFromPoint(b).subtract(vecFromPoint(a))
-
 	aButVector := vecFromPoint(a)
 	bButVector := vecFromPoint(b)
 
+	direction := bButVector.subtract(aButVector).normalize()
 	distance := aButVector.euclideanDistance(bButVector)
 
-	antis[0] = pointFromVec(bButVector.add(direction.scale(distance)))
-	antis[1] = pointFromVec(aButVector.subtract(direction.scale(distance)))
+	displacement := direction.scale(distance)
+
+	antis[0] = pointFromVec(bButVector.add(displacement))
+	antis[1] = pointFromVec(aButVector.subtract(direction))
 
 	return antis
 }
