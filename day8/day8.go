@@ -35,7 +35,7 @@ func printGrid(antennas map[point]rune, size point, color int) {
 }
 
 func Run() {
-	antennaLocations, antennas, gridSize := getInput("day8/testin")
+	antennaLocations, antennas, gridSize := getInput("day8/tinyin")
 	_, _, _ = gridSize.x, gridSize.y, antennas
 
 	for k, v := range antennaLocations {
@@ -192,18 +192,5 @@ func pointFromVec(v vec2d) point {
 
 // any two points form a line and have two antinodes
 func getAntis(a, b point) [2]point {
-	var antis [2]point
 
-	aButVector := vecFromPoint(a)
-	bButVector := vecFromPoint(b)
-
-	direction := bButVector.subtract(aButVector).normalize()
-	distance := aButVector.euclideanDistance(bButVector)
-
-	displacement := direction.scale(distance)
-
-	antis[0] = pointFromVec(bButVector.add(displacement))
-	antis[1] = pointFromVec(aButVector.subtract(direction))
-
-	return antis
 }
