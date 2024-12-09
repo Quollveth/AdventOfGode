@@ -32,6 +32,6 @@ func main() {
 	case "6":
 		day6.Run()
 	case "7":
-		day7.Run()
-	}
+		day7.Part1()
+		day7.Part2()
 }

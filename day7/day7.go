@@ -27,7 +27,19 @@ eg:
 	as long as one path down the tree is valid the whole tree is valid
 */
 
-func Run() {
+var part1 bool
+
+func Part1() {
+	part1 = true
+	run()
+}
+
+func Part2() {
+	part1 = false
+	run()
+}
+
+func run() {
 	input := util.ReadFileLines("day7/input")
 
 	var count int64
@@ -107,7 +119,7 @@ func validateLine(current int, remain []int) bool {
 	}
 
 	// concat is also an easy check
-	if isConcat(current, next) {
+	if isConcat(current, next) && !part1 {
 		if validateLine(deconcat(current, next), remain[1:]) {
 			return true
 		}
