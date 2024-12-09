@@ -15,18 +15,37 @@ type point struct {
 var antinodes map[point]bool = make(map[point]bool)
 
 func Run() {
-	input := getInput("day8/testin")
+	antennaLocations, gridSize := getInput("day8/tinyin")
 
-	for k, v := range input {
-		fmt.Printf("'%v': %v\n", string(k), v)
+	for _, v := range antennaLocations {
+		//fmt.Printf("'%v': %v\n", string(k), v)
 
 		findAntinodes(&v)
 	}
 
-	fmt.Println(len(antinodes))
+	allAntennas := make(map[point]rune)
+	for c, locs := range antennaLocations {
+		for _, l := range locs {
+			allAntennas[l] = c
+		}
+	}
+
+	for i := range gridSize.x {
+		for j := range gridSize.y {
+			toPrint := "."
+			if _, has := antinodes[point{i, j}]; has {
+				toPrint = "#"
+			}
+			if _, has := allAntennas[point{i, j}]; has {
+				toPrint = string(allAntennas[point{i, j}])
+			}
+			fmt.Print(toPrint)
+		}
+		fmt.Print("\n")
+	}
 }
 
-func getInput(which string) map[rune][]point {
+func getInput(which string) (map[rune][]point, point) {
 	in := util.ReadFileLines(which)
 
 	inputCols := len(in[0])
@@ -50,10 +69,15 @@ func getInput(which string) map[rune][]point {
 		}
 	}
 
-	return antenna
+	gridSize := point{
+		x: inputCols,
+		y: inputRows,
+	}
+
+	return antenna, gridSize
 }
 
-// finds how many antinodes are formed by these points
+// finds all antinodes are formed by these points
 func findAntinodes(nodes *[]point) {
 	// we need at least two antenna to have a line
 	if len(*nodes) < 2 {
