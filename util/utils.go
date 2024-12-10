@@ -23,7 +23,7 @@ func Contains[T comparable](s []T, v T) bool {
 }
 
 func InRange(a, min, max int) bool {
-	return min < a && a < max
+	return min <= a && a < max
 }
 
 func Abs(n int) int {
