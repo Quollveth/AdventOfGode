@@ -36,3 +36,12 @@ func Abs(n int) int {
 func Absdiff(x, y int) int {
 	return Abs(x - y)
 }
+
+func RemoveAtIndex[T any](slice []T, index int) []T {
+	// no bounds check if you get oob access thats a skill issue
+	newSlice := make([]T, 0, len(slice)-1)
+	newSlice = append(newSlice, slice[:index]...)
+	newSlice = append(newSlice, slice[index+1:]...)
+
+	return newSlice
+}

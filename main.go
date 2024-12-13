@@ -11,9 +11,13 @@ import (
 	"github.com/quollveth/AdventOfGode/day6"
 	"github.com/quollveth/AdventOfGode/day7"
 	"github.com/quollveth/AdventOfGode/day8"
+	"github.com/quollveth/AdventOfGode/day9"
 )
 
 func main() {
+	day9.Run()
+	return
+
 	n := os.Args[1]
 
 	switch n {
@@ -37,5 +41,7 @@ func main() {
 		day7.Part2()
 	case "8":
 		day8.Run()
+	case "9":
+		day9.Run()
 	}
 }
